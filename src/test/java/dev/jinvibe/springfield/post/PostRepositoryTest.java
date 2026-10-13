@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.time.LocalDate;
 import java.util.Set;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
@@ -18,6 +19,12 @@ class PostRepositoryTest {
 
 	@Autowired
 	private PostRepository postRepository;
+
+	// 같은 인메모리 DB를 쓰는 다른 테스트 컨텍스트가 적재한 글을 지운다. 테스트 트랜잭션이 끝나면 롤백된다.
+	@BeforeEach
+	void clear() {
+		postRepository.deleteAll();
+	}
 
 	@Test
 	void req_6_1_draftIsExcludedFromPublishedQueries() {
