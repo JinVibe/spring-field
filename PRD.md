@@ -15,7 +15,7 @@ Spring을 공부하며 정리한 글을 올리는 개인 사이트. 사이트 �
 
 - 회원가입, 로그인, 댓글
 - 관리자 에디터 UI (글은 파일로만 작성)
-- 외부 DB, 클라우드 배포 자동화
+- 외부 DB 운영, 클라우드 배포 자동화 (PostgreSQL·MySQL은 호환성 지원만 하고 운영 환경은 두지 않는다)
 - 검색엔진 연동, SEO 최적화
 - 디자인 시스템, 다크모드
 
@@ -26,11 +26,14 @@ Spring을 공부하며 정리한 글을 올리는 개인 사이트. 사이트 �
 
 ## 5. 기술 스택
 
-- Java 21, Spring Boot 3.x, Gradle (Kotlin DSL)
+- Java 21, Spring Boot 4.x (Spring Framework 7), Gradle (Kotlin DSL)
 - Spring MVC + Thymeleaf (SSR, JS 최소화)
-- Spring Data JPA + H2 (파일 모드, 로컬 전용)
+- Spring Data JPA, 벤더 중립: 애플리케이션 코드는 DB 벤더를 모르고, 바뀌는 것은 `application-{profile}.yaml`과 드라이버뿐이다.
+  - DB: PostgreSQL 기본, MySQL 호환 보장(Testcontainers 교차 테스트), 로컬·단위 테스트는 H2(파일 모드, `MODE=PostgreSQL`)
+  - 기본 프로파일은 `local`(H2)로 두어 `./gradlew bootRun` 한 번에 뜬다. 다른 DB는 `--spring.profiles.active=postgres|mysql`.
+  - 스키마는 Flyway로 관리한다(`ddl-auto` 사용 안 함). 네이티브 쿼리·벤더 종속 SQL 금지, JPQL과 Spring Data 메서드만.
 - flexmark-java (Markdown → HTML)
-- 테스트: JUnit 5, AssertJ, Spring Boot Test, Testcontainers는 필요할 때만
+- 테스트: JUnit 5, AssertJ, Spring Boot Test, Testcontainers(PostgreSQL·MySQL 교차 통합 테스트)
 - 빌드 검사: Checkstyle 또는 Spotless (하나만)
 
 ## 6. 기능 요구사항
@@ -50,7 +53,7 @@ Spring을 공부하며 정리한 글을 올리는 개인 사이트. 사이트 �
   status: draft | published
   ---
   ```
-- 애플리케이션 기동 시 posts 디렉터리를 스캔해 DB(H2)에 적재한다. 파일이 바뀌면 재기동으로 반영한다 (핫리로드는 비목표).
+- 애플리케이션 기동 시 posts 디렉터리를 스캔해 DB에 적재한다. 파일이 바뀌면 재기동으로 반영한다 (핫리로드는 비목표).
 - `status: draft` 글은 목록과 상세 어디에도 노출하지 않는다.
 
 ### 6.2 페이지
@@ -99,7 +102,11 @@ spring-field/
 │   ├── posts/         # 글
 │   ├── templates/     # Thymeleaf
 │   ├── static/        # css, highlight.js
-│   └── application.yml
+│   ├── db/migration/  # Flyway 마이그레이션 (세 벤더 공통 표준 SQL)
+│   ├── application.yaml          # 공통 (JPA, Actuator, 글 경로)
+│   ├── application-local.yaml    # H2 파일 모드 (기본 프로파일)
+│   ├── application-postgres.yaml
+│   └── application-mysql.yaml
 ├── src/test/java/...  # 요구사항별 테스트 + 글 검증 테스트
 ├── docs/              # 설계 메모, ADR
 └── README.md
@@ -114,11 +121,12 @@ spring-field/
 5. 없는 slug 요청 시 404 페이지가 뜬다.
 6. `./gradlew test` 가 통과하고, 6.1·6.2 요구사항마다 대응 테스트가 존재한다.
 7. `/actuator/info` 에 커밋 해시와 글 개수가 나온다.
+8. PostgreSQL·MySQL Testcontainers 통합 테스트가 모두 통과한다.
 
 ## 10. 마일스톤
 
-- M1 — 뼈대: 프로젝트 생성, Post 엔티티, posts 로더, `/`와 `/posts/{slug}` 동작. 글 1개로 확인.
-- M2 — 탐색: 카테고리·태그 페이지, 이전·다음 글, 404, draft 필터.
+- M1 — 뼈대: 프로젝트 생성, H2 + Flyway(`V1__init.sql`), Post 엔티티, posts 로더, `/`와 `/posts/{slug}` 동작. 글 1개로 확인.
+- M2 — 탐색: 카테고리·태그 페이지, 이전·다음 글, 404, draft 필터. 마지막에 postgres·mysql 프로파일과 Testcontainers 교차 테스트 추가.
 - M3 — 코드 연결: front matter `code`/`test` 링크, 하이라이트, Actuator info.
 - M4 — 글 채우기: Core·Boot·MVC·JPA 각 1편 이상 작성, 각 글에 예제·테스트 연결.
 - M5 — 정리: README 갱신, docs/ADR 2개 이상(왜 SSR인지, 왜 파일 기반인지).
