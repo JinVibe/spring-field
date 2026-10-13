@@ -1,4 +1,4 @@
-package dev.jinvibe.spring_field;
+package dev.jinvibe.springfield;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;

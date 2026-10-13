@@ -1,4 +1,4 @@
-package dev.jinvibe.spring_field;
+package dev.jinvibe.springfield;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
