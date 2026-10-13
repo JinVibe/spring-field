@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ko">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>spring-field</title>
+</head>
+<body>
+<header th:replace="~{fragments/layout :: header}"></header>
+<main>
+	<p>전체 글 <span th:text="${totalCount}">0</span>개</p>
+
+	<p th:if="${categories.isEmpty()}">아직 공개된 글이 없습니다.</p>
+
+	<section th:each="entry : ${categories}">
+		<h2 th:text="${entry.key}">category</h2>
+		<ul>
+			<li th:each="post : ${entry.value}">
+				<a th:href="@{/posts/{slug}(slug=${post.slug})}" th:text="${post.title}">title</a>
+				<time th:datetime="${post.publishedOn}" th:text="${post.publishedOn}">2026-10-14</time>
+			</li>
+		</ul>
+	</section>
+</main>
+</body>
+</html>

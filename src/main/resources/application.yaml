@@ -1,0 +1,13 @@
+spring:
+  application:
+    name: spring-field
+  profiles:
+    default: local
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: none
+
+spring-field:
+  posts:
+    location: classpath*:posts/**/*.md
