@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ko">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title th:text="${post.title} + ' - spring-field'">title - spring-field</title>
+</head>
+<body>
+<header th:replace="~{fragments/layout :: header}"></header>
+<main>
+	<article>
+		<h1 th:text="${post.title}">title</h1>
+		<p>
+			<span th:text="${post.category}">category</span>
+			· <time th:datetime="${post.publishedOn}" th:text="${post.publishedOn}">2026-10-14</time>
+		</p>
+		<ul th:unless="${post.tags.isEmpty()}">
+			<li th:each="tag : ${post.tags}" th:text="${tag}">tag</li>
+		</ul>
+		<!-- 본문은 저장소의 Markdown 파일에서 온 신뢰할 수 있는 HTML이다. -->
+		<div th:utext="${html}"></div>
+	</article>
+</main>
+</body>
+</html>
